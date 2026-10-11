@@ -2,6 +2,7 @@ import base64
 import os
 from utils.registry.gameaccount import gamereg_uid, gamereg_export, gamereg_import, gamereg_delete_all
 from module.logger import log
+from app.tools import config_profile
 
 data_dir = "settings/accounts"
 xor_key = "TI4ftRSDaP63kBxxoLoZ5KpVmRBz00JikzLNweryzZ4wecWJxJO9tbxlH9YDvjAr"
@@ -90,6 +91,8 @@ def import_account(account_id: int):
     if not os.path.exists(account_reg_file):
         raise FileNotFoundError(f"Account {account_id} not found (load)")
     gamereg_import(account_reg_file)
+    # 配置跟随账号：切换账号后同步切换配置文件（开关未开启时不做任何事）
+    config_profile.sync_to(account_id)
 
 def save_account_name(account_id: int, account_name: str):
     name_file = os.path.join(data_dir, f"{account_id}.name")

@@ -10,6 +10,7 @@ from app.common.icon import UiIcon
 from module.config import cfg
 from app.tools.account_manager import accounts, reload_all_account_from_files, dump_current_account, delete_account, \
     save_account_name, import_account, save_acc_and_pwd, clear_reg
+from app.tools import config_profile
 from module.logger import log
 from module.localization import tr
 
@@ -19,7 +20,7 @@ class AccountsCard(QFrame):
     def __init__(self, icon: Union[str, QIcon, FluentIconBase], title, content=None, texts=None, parent=None):
         super().__init__(parent=parent)
         FluentStyleSheet.SETTING_CARD.apply(self)
-        self.setFixedHeight(400)
+        self.setFixedHeight(470)
         #
         self.widget = ListWidget()
         self.wLayout = QGridLayout()
@@ -45,6 +46,11 @@ class AccountsCard(QFrame):
         self.autologinAccountButton = QPushButton(tr("自动登录"), self)
         self.refreshAccountButton = QPushButton(tr("刷新"), self)
         self.clearRegButton = QPushButton(tr("清除注册表"), self)
+        self.followConfigButton = QPushButton(self)
+        self.followConfigButton.setCheckable(True)
+        self.followConfigButton.setToolTip(tr("开启后每个账号使用自己的配置；关闭时所有账号共用同一份配置"))
+        self.copyConfigButton = QPushButton(tr("复制配置"), self)
+        self.copyConfigButton.setToolTip(tr("把选中账号的配置替换为其他账号或官方默认配置"))
         self.buttons.addWidget(self.addAccountButton)
         self.buttons.addWidget(self.importAccountButton)
         self.buttons.addWidget(self.deleteAccountButton)
@@ -52,15 +58,33 @@ class AccountsCard(QFrame):
         self.buttons.addWidget(self.autologinAccountButton)
         self.buttons.addWidget(self.refreshAccountButton)
         self.buttons.addWidget(self.clearRegButton)
+        self.buttons.addWidget(self.followConfigButton)
+        self.buttons.addWidget(self.copyConfigButton)
         _self = self
+
+        def updateFollowConfigButton():
+            enabled = config_profile.is_enabled()
+            # 阻止程序化改状态触发 toggled 回调，避免打开页面时误改配置
+            _self.followConfigButton.blockSignals(True)
+            _self.followConfigButton.setChecked(enabled)
+            _self.followConfigButton.blockSignals(False)
+            _self.followConfigButton.setText(
+                tr("配置跟随账号：开") if enabled else tr("配置跟随账号：关"))
 
         def load_accounts():
             _self.widget.clear()
             for account in accounts:
-                item = QListWidgetItem(account.account_name)
+                texts = [account.account_name]
+                if config_profile.is_enabled():
+                    if config_profile.get_loaded_account() == account.account_id:
+                        texts.append(tr("[当前]"))
+                    if config_profile.has_account_config(account.account_id):
+                        texts.append(tr("[独立配置]"))
+                item = QListWidgetItem(" ".join(texts))
                 item.setData(Qt.ItemDataRole.UserRole, account.account_id)
                 _self.widget.addItem(item)
             _self.widget.clearSelection()
+        updateFollowConfigButton()
         try:
             load_accounts()
         except Exception as e:
@@ -170,6 +194,52 @@ class AccountsCard(QFrame):
         self.autologinAccountButton.clicked.connect(autologinAccountButtonAction)
         self.deleteAccountButton.clicked.connect(deleteAccountButtonAction)
         self.clearRegButton.clicked.connect(clearRegButtonAction)
+
+        def followConfigButtonAction(checked):
+            config_profile.set_enabled(checked)
+            updateFollowConfigButton()
+            load_accounts()
+            if checked:
+                QMessageBox.information(
+                    None, tr("配置跟随账号"),
+                    tr("已开启：每个账号使用自己的配置。\n当前正在使用的配置已保存为当前账号的配置。"))
+            else:
+                QMessageBox.information(
+                    None, tr("配置跟随账号"),
+                    tr("已关闭：所有账号共用同一份配置（已保存的账号配置不会被删除）。"))
+
+        def copyConfigButtonAction():
+            items = _self.widget.selectedItems()
+            if len(items) == 0:
+                QMessageBox.warning(None, tr("复制配置"), tr("请选择要复制配置到的账户"))
+                return
+            if len(items) > 1:
+                QMessageBox.warning(None, tr("复制配置"), tr("只能选择一个账户"))
+                return
+            dst_id = items[0].data(Qt.ItemDataRole.UserRole)
+
+            sources = []
+            for account in accounts:
+                if account.account_id != dst_id:
+                    sources.append((f"{account.account_name}（{account.account_id}）", account.account_id))
+            labels = [tr("官方默认配置")] + [s[0] for s in sources]
+            text, ok = QInputDialog.getItem(
+                None, tr("复制配置"), tr("选择要复制过来的配置来源（将覆盖目标账号现有配置）"), labels, 0, False)
+            if not ok:
+                return
+            try:
+                index = labels.index(text)
+            except ValueError:
+                return
+            src_id = None if index == 0 else sources[index - 1][1]
+            if config_profile.copy_account_config(src_id, dst_id):
+                load_accounts()
+                QMessageBox.information(None, tr("复制配置"), tr("配置已复制"))
+            else:
+                QMessageBox.warning(None, tr("复制配置"), tr("复制失败，请查看日志"))
+
+        self.followConfigButton.toggled.connect(followConfigButtonAction)
+        self.copyConfigButton.clicked.connect(copyConfigButtonAction)
         #
         self.mLayout = QGridLayout()
         self.mLayout.addLayout(self.wLayout, 0, 0, 1, 1)

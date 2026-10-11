@@ -5,6 +5,7 @@ import psutil
 
 
 from app.tools.account_manager import load_acc_and_pwd
+from app.tools import config_profile
 from utils.registry.gameaccount import gamereg_uid
 from .starrailcontroller import StarRailController
 
@@ -41,6 +42,8 @@ def wait_until(condition, timeout, period=1):
 
 def start():
     log.hr("开始运行", 0)
+    # 配置跟随账号：按当前登录的账号切换配置文件（开关未开启时不做任何事）
+    config_profile.sync_current()
     start_game()
     log.hr("完成", 2)
 
