@@ -14,6 +14,7 @@
 # 可用的任务列表（任务ID -> 名称 msgid）
 AVAILABLE_TASKS = {
     "main": "完整运行",
+    "multi": "多账号连跑",
     "routine": "日常",
     "daily": "每日实训",
     "power": "清体力",

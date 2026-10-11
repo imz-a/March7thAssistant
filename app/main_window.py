@@ -464,6 +464,11 @@ class MainWindow(MSFluentWindow):
             # 切换到日志界面
             self.switchTo(self.logInterface)
             return
+        # 多账号连跑：开启开关后，手动"完整运行"自动改为依次运行所有已导出账号
+        # （定时任务走 runScheduledTask，不经过此信号，保持单账号行为）
+        if command == "main" and bool(cfg.get_value('multi_account_run_enable', False)):
+            command = "multi"
+            log.info("已开启多账号连跑，本次将依次运行所有已导出的账号")
         # 静默检查更新
         checkUpdate(self, silent=True)
         # 切换到日志界面

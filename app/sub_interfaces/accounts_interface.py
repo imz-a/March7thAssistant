@@ -10,6 +10,7 @@ from app.common.icon import UiIcon
 from module.config import cfg
 from app.tools.account_manager import accounts, reload_all_account_from_files, dump_current_account, delete_account, \
     save_account_name, import_account, save_acc_and_pwd, clear_reg
+from app.tools import account_manager
 from app.tools import config_profile
 from app.tools.config_profile import (ensure_account_configs, is_customized,
                                       remove_account_config)
@@ -22,7 +23,7 @@ class AccountsCard(QFrame):
     def __init__(self, icon: Union[str, QIcon, FluentIconBase], title, content=None, texts=None, parent=None):
         super().__init__(parent=parent)
         FluentStyleSheet.SETTING_CARD.apply(self)
-        self.setFixedHeight(470)
+        self.setFixedHeight(500)
         #
         self.widget = ListWidget()
         self.wLayout = QGridLayout()
@@ -53,6 +54,10 @@ class AccountsCard(QFrame):
         self.followConfigButton.setToolTip(tr("开启后每个账号使用自己的配置；关闭时所有账号共用同一份配置"))
         self.copyConfigButton = QPushButton(tr("复制配置"), self)
         self.copyConfigButton.setToolTip(tr("把选中账号的配置替换为其他账号或官方默认配置"))
+        self.multiRunButton = QPushButton(self)
+        self.multiRunButton.setCheckable(True)
+        self.multiRunButton.setToolTip(
+            tr("开启后，在主界面点击“开始运行”将依次运行所有已导出的账号（每个账号跑完自动切换下一个）"))
         self.buttons.addWidget(self.addAccountButton)
         self.buttons.addWidget(self.importAccountButton)
         self.buttons.addWidget(self.deleteAccountButton)
@@ -62,6 +67,7 @@ class AccountsCard(QFrame):
         self.buttons.addWidget(self.clearRegButton)
         self.buttons.addWidget(self.followConfigButton)
         self.buttons.addWidget(self.copyConfigButton)
+        self.buttons.addWidget(self.multiRunButton)
         _self = self
 
         def updateFollowConfigButton():
@@ -72,6 +78,15 @@ class AccountsCard(QFrame):
             _self.followConfigButton.blockSignals(False)
             _self.followConfigButton.setText(
                 tr("配置跟随账号：开") if enabled else tr("配置跟随账号：关"))
+
+        def updateMultiRunButton():
+            enabled = bool(cfg.get_value('multi_account_run_enable', False))
+            # 阻止程序化改状态触发 toggled 回调，避免打开页面时误改配置
+            _self.multiRunButton.blockSignals(True)
+            _self.multiRunButton.setChecked(enabled)
+            _self.multiRunButton.blockSignals(False)
+            _self.multiRunButton.setText(
+                tr("多账号连跑：开") if enabled else tr("多账号连跑：关"))
 
         def load_accounts():
             _self.widget.clear()
@@ -88,6 +103,7 @@ class AccountsCard(QFrame):
                 _self.widget.addItem(item)
             _self.widget.clearSelection()
         updateFollowConfigButton()
+        updateMultiRunButton()
         try:
             load_accounts()
         except Exception as e:
@@ -253,8 +269,33 @@ class AccountsCard(QFrame):
             else:
                 QMessageBox.warning(None, tr("复制配置"), tr("复制失败，请查看日志"))
 
+        def multiRunButtonAction(checked):
+            if checked:
+                # 没有任何已导出账号时禁止开启，避免用户开了开关却一直没反应
+                account_manager.reload_all_account_from_files()
+                if not account_manager.accounts:
+                    cfg.set_value('multi_account_run_enable', False)
+                    updateMultiRunButton()
+                    QMessageBox.warning(
+                        None, tr("多账号连跑"),
+                        tr("还没有任何已导出的账号。\n请先对每个账号执行“导出当前游戏账户”后再开启。"))
+                    return
+            cfg.set_value('multi_account_run_enable', bool(checked))
+            updateMultiRunButton()
+            if checked:
+                QMessageBox.information(
+                    None, tr("多账号连跑"),
+                    tr("已开启：在主界面点击“开始运行”时，将依次运行所有已导出的账号，"
+                       "每个账号跑完自动切换下一个，结束后发送汇总通知。\n"
+                       "定时任务不受影响，仍按原配置运行当前账号。"))
+            else:
+                QMessageBox.information(
+                    None, tr("多账号连跑"),
+                    tr("已关闭：“开始运行”仅运行当前账号。"))
+
         self.followConfigButton.toggled.connect(followConfigButtonAction)
         self.copyConfigButton.clicked.connect(copyConfigButtonAction)
+        self.multiRunButton.toggled.connect(multiRunButtonAction)
         #
         self.mLayout = QGridLayout()
         self.mLayout.addLayout(self.wLayout, 0, 0, 1, 1)

@@ -278,6 +278,19 @@ def run_sub_task(action):
         game.stop(False)
 
 
+def run_multi_account_action():
+    """多账号连跑：依次切换每个已导出账号并运行（GUI 开关与 CLI 共用）"""
+    from tasks.multi_account import run as run_multi
+    telemetry.track_task_start("multi")
+    task_start_time = time.time()
+    try:
+        success = bool(run_multi())
+        telemetry.track_task_complete("multi", success, time.time() - task_start_time)
+    except Exception:
+        telemetry.track_task_complete("multi", False, time.time() - task_start_time)
+        raise
+
+
 def run_sub_task_gui(action):
     gui_tasks = {
         "universe_gui": Universe.gui,
@@ -352,6 +365,10 @@ def main(action=None, no_run_immediately=False, workflow_name=None, workflow_ste
     # 子任务 原生图形界面
     elif action in ["universe_gui", "fight_gui"]:
         run_sub_task_gui(action)
+
+    # 多账号连跑
+    elif action == "multi":
+        run_multi_account_action()
 
     # 子任务 更新项目
     elif action in ["universe_update", "fight_update", "mobileui_update"]:

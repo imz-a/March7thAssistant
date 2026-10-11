@@ -33,6 +33,9 @@ exit_after_failure: false # 是否在失败后直接退出。true 直接退出�
 # 任务完成后操作
 after_finish: None # 任务完成后的操作，可选值："None"（无操作）, "Exit"（退出程序）, "Loop"（循环执行）, "Shutdown"（关机）, "Sleep"（睡眠）, "Hibernate"（休眠）, "Restart"（重启）, "Logoff"（注销）, "TurnOffDisplay"（关闭显示器）, "RunScript"（运行脚本）。
 
+# 多账号连跑。true 开启后，在主界面点击"开始运行"将依次运行所有已导出的账号（每个账号跑完自动切换下一个，可配合"配置跟随账号"使用）；false 关闭。也可在账户设置页开关。默认为 false。
+multi_account_run_enable: false
+
 # 任务完成后是否播放提示音
 play_audio: false # true 播放，false 不播放。
 
