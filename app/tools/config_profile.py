@@ -16,7 +16,9 @@
         2. 再载入目标账号的配置（全局项仍取当前 config.yaml 的值）；
         3. 目标账号还没有配置时，用官方默认配置（config.example.yaml）生成一份。
     - 首次打开开关的那一刻，会把正在使用的 config.yaml 原样保存为当前账号的配置，
-      避免已经调好的设置丢失（仅在「打开开关」时发生，不是新账号的默认行为）。
+      避免已经调好的设置丢失（仅在「打开开关」时发生，不是新账号的默认行为）；
+      同时为其余尚未建立配置的账号各生成一份官方默认配置，
+      这样「开关打开 = 每个账号都有自己的配置」在文件层面立刻成立。
 
 全局项（不随账号切换）的判定见 is_global_key()：白名单键 + 前缀族。
 若官方后续新增了环境类配置项而未列入，它会变成「随账号走」——此时把它加进
@@ -203,6 +205,84 @@ def config_path_of(uid) -> str:
 
 def has_account_config(uid) -> bool:
     return uid is not None and os.path.exists(config_path_of(uid))
+
+
+def _plain(obj):
+    """把 ruamel 的 CommentedMap/CommentedSeq 转成普通 dict/list 便于比较"""
+    if isinstance(obj, dict):
+        return {k: _plain(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_plain(v) for v in obj]
+    return obj
+
+
+def is_customized(uid) -> bool:
+    """
+    账号 uid 的配置是否已「自定义」——即与官方默认配置不同。
+
+    用于账号列表上的 [已自定义] 标记：只标出真正被你改过的账号，
+    刚建立、还没动过的账号不会显示，避免「每个号都标一遍」的噪声。
+    """
+    if not has_account_config(uid):
+        return False
+    data = _read(config_path_of(uid))
+    if not isinstance(data, dict):
+        return False
+    return _plain(data) != _plain(_default_account_part())
+
+
+def ensure_account_config(uid) -> bool:
+    """
+    确保账号 uid 有独立的配置文件；没有就用官方默认配置建立一份。
+
+    打开开关时会对所有已导出的账号调用一次，这样「开关打开 = 每个账号都有自己的配置」
+    这句话在文件层面立刻成立，不用等到某个账号第一次被切到才悄悄生成。
+    """
+    if uid is None:
+        return False
+    try:
+        uid = int(uid)
+    except (TypeError, ValueError):
+        return False
+    if has_account_config(uid):
+        return True
+    return bool(_write(config_path_of(uid), _default_account_part()))
+
+
+def ensure_account_configs(uids) -> int:
+    """为一组账号批量建立配置文件，返回本次新建的份数"""
+    created = 0
+    for uid in uids or []:
+        if uid is None:
+            continue
+        try:
+            uid = int(uid)
+        except (TypeError, ValueError):
+            continue
+        if not has_account_config(uid):
+            if ensure_account_config(uid):
+                created += 1
+    return created
+
+
+def remove_account_config(uid) -> bool:
+    """删除账号 uid 的配置文件（删除账号时一并清理）"""
+    if uid is None:
+        return False
+    try:
+        uid = int(uid)
+    except (TypeError, ValueError):
+        return False
+    path = config_path_of(uid)
+    if not os.path.exists(path):
+        return False
+    try:
+        os.remove(path)
+        log.info(f"[按账号配置] 已删除账号 {uid} 的配置")
+        return True
+    except Exception as e:
+        log.error(f"[按账号配置] 删除 {path} 失败: {e}")
+        return False
 
 
 def _account_part(config) -> dict:

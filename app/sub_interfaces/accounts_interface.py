@@ -11,6 +11,8 @@ from module.config import cfg
 from app.tools.account_manager import accounts, reload_all_account_from_files, dump_current_account, delete_account, \
     save_account_name, import_account, save_acc_and_pwd, clear_reg
 from app.tools import config_profile
+from app.tools.config_profile import (ensure_account_configs, is_customized,
+                                      remove_account_config)
 from module.logger import log
 from module.localization import tr
 
@@ -78,8 +80,9 @@ class AccountsCard(QFrame):
                 if config_profile.is_enabled():
                     if config_profile.get_loaded_account() == account.account_id:
                         texts.append(tr("[当前]"))
-                    if config_profile.has_account_config(account.account_id):
-                        texts.append(tr("[独立配置]"))
+                    # 只标出「已经被改过」的账号；刚建立、还没动过的账号不标记
+                    if is_customized(account.account_id):
+                        texts.append(tr("[已自定义]"))
                 item = QListWidgetItem(" ".join(texts))
                 item.setData(Qt.ItemDataRole.UserRole, account.account_id)
                 _self.widget.addItem(item)
@@ -110,6 +113,8 @@ class AccountsCard(QFrame):
             for item in items:
                 account_id = item.data(Qt.ItemDataRole.UserRole)
                 delete_account(account_id)
+                # 账号被删除时，顺手清掉它自己的那份配置，避免留下无主文件
+                remove_account_config(account_id)
             load_accounts()
 
         def renameAccountButtonAction(self):
@@ -196,13 +201,23 @@ class AccountsCard(QFrame):
         self.clearRegButton.clicked.connect(clearRegButtonAction)
 
         def followConfigButtonAction(checked):
-            config_profile.set_enabled(checked)
+            created = 0
+            if checked:
+                # 先按当前配置「收养」正在使用的账号，再给其余账号各建一份默认配置，
+                # 这样一打开开关，列表里每个账号就都已经有自己的配置了。
+                config_profile.set_enabled(True)
+                created = ensure_account_configs(
+                    [a.account_id for a in accounts])
+            else:
+                config_profile.set_enabled(False)
             updateFollowConfigButton()
             load_accounts()
             if checked:
                 QMessageBox.information(
                     None, tr("配置跟随账号"),
-                    tr("已开启：每个账号使用自己的配置。\n当前正在使用的配置已保存为当前账号的配置。"))
+                    tr("已开启：每个账号使用自己的配置。\n"
+                       "当前正在使用的配置已保存为当前账号的配置，"
+                       f"另有 {created} 个账号已按官方默认配置建立各自的配置。"))
             else:
                 QMessageBox.information(
                     None, tr("配置跟随账号"),
