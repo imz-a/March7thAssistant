@@ -116,6 +116,10 @@ def run(task: str = "main", account_ids=None, stop_on_error: bool = False,
             log.info(f"账号已切换: {account.account_name}({account.account_id})")
             # 运行前重新加载配置
             cfg._load_config()
+            # 通知合并：与官方主流程一致，每个账号的任务通知合并为一条
+            # （notify_merge 关闭时 start_batch/flush_batch 均为无操作）
+            if cfg.notify_merge:
+                notif.start_batch()
             _run_tasks_once(task)
         except Exception as e:
             success = False
@@ -127,19 +131,21 @@ def run(task: str = "main", account_ids=None, stop_on_error: bool = False,
                 pass
             _notify(f"[多账号连跑] 账号 {account.account_name}({account.account_id}) 运行失败: {e}",
                     NotificationLevel.ERROR)
-            if stop_on_error:
-                log.error("已启用 stop_on_error，停止后续账号")
-                results.append((account, False, time.time() - start_time))
-                break
+        finally:
+            # 无论成功、失败还是 stop_on_error 提前跳出，都要释放 OCR 内存
+            # （与 game.stop 行为一致）并冲掉本账号的合并通知，避免通知残留在
+            # 未结束的批次里导致汇总通知也被吞
+            ocr.exit_ocr()
+            if cfg.notify_merge:
+                notif.flush_batch()
 
         cost = time.time() - start_time
         results.append((account, success, cost))
         log.info(f"账号 {account.account_name}({account.account_id}) "
                  f"{'完成' if success else '失败'}，耗时 {cost / 60:.1f} 分钟")
-        # 释放 OCR 内存（与 game.stop 行为一致）
-        ocr.exit_ocr()
-        if cfg.notify_merge:
-            notif.flush_batch()
+        if not success and stop_on_error:
+            log.error("已启用 stop_on_error，停止后续账号")
+            break
 
     # 汇总通知
     lines = [f"{a.account_name}({a.account_id}): {'✅ 成功' if ok else '❌ 失败'} ({c / 60:.1f} 分钟)"

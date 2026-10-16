@@ -90,10 +90,13 @@ class AccountsCard(QFrame):
 
         def load_accounts():
             _self.widget.clear()
+            # 开关状态只读一次：避免循环内每个账号都重复读状态文件
+            follow_enabled = config_profile.is_enabled()
+            loaded_account = config_profile.get_loaded_account() if follow_enabled else None
             for account in accounts:
                 texts = [account.account_name]
-                if config_profile.is_enabled():
-                    if config_profile.get_loaded_account() == account.account_id:
+                if follow_enabled:
+                    if loaded_account == account.account_id:
                         texts.append(tr("[当前]"))
                     # 只标出「已经被改过」的账号；刚建立、还没动过的账号不标记
                     if is_customized(account.account_id):
@@ -233,7 +236,7 @@ class AccountsCard(QFrame):
                     None, tr("配置跟随账号"),
                     tr("已开启：每个账号使用自己的配置。\n"
                        "当前正在使用的配置已保存为当前账号的配置，"
-                       f"另有 {created} 个账号已按官方默认配置建立各自的配置。"))
+                       "另有 {count} 个账号已按官方默认配置建立各自的配置。").format(count=created))
             else:
                 QMessageBox.information(
                     None, tr("配置跟随账号"),

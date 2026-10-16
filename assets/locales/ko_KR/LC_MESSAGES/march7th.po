@@ -6264,3 +6264,104 @@ msgstr "HoYoPlay"
 #: app/setting_interface.py:3349
 msgid "选择启动器路径"
 msgstr "런처 경로 선택"
+
+#: app/sub_interfaces/accounts_interface.py:103
+msgid "[已自定义]"
+msgstr "[사용자 지정]"
+
+#: app/sub_interfaces/accounts_interface.py:100
+msgid "[当前]"
+msgstr "[현재]"
+
+#: app/sub_interfaces/accounts_interface.py:273
+msgid "复制失败，请查看日志"
+msgstr "복사 실패, 로그를 확인하세요"
+
+#: app/sub_interfaces/accounts_interface.py:55
+msgid "复制配置"
+msgstr "설정 복사"
+
+#: app/sub_interfaces/accounts_interface.py:283
+msgid "多账号连跑"
+msgstr "다중 계정 연속 실행"
+
+#: app/sub_interfaces/accounts_interface.py:89
+msgid "多账号连跑：关"
+msgstr "다중 계정 연속 실행: 꺼짐"
+
+#: app/sub_interfaces/accounts_interface.py:89
+msgid "多账号连跑：开"
+msgstr "다중 계정 연속 실행: 켜짐"
+
+#: app/sub_interfaces/accounts_interface.py:259
+msgid "官方默认配置"
+msgstr "공식 기본 설정"
+
+#: app/sub_interfaces/accounts_interface.py:297
+msgid "已关闭：“开始运行”仅运行当前账号。"
+msgstr "끄기: \"실행\"은 현재 계정만 실행합니다."
+
+#: app/sub_interfaces/accounts_interface.py:243
+msgid "已关闭：所有账号共用同一份配置（已保存的账号配置不会被删除）。"
+msgstr "끄기: 모든 계정이 동일한 설정을 공유합니다 (저장된 계정 설정은 삭제되지 않습니다)."
+
+#: app/sub_interfaces/accounts_interface.py:291
+msgid ""
+"已开启：在主界面点击“开始运行”时，将依次运行所有已导出的账号，每个账号跑完自动切换下一个，结束后发送汇总通知。\n"
+"定时任务不受影响，仍按原配置运行当前账号。"
+msgstr ""
+"켜기: 메인 화면에서 \"실행\"을 클릭하면 내보낸 모든 계정을 순차적으로 실행하며, 각 계정 완료 후 자동으로 다음 계정으로 전환합니다. 완료 후 요약 알림을 보냅니다.\n"
+"예약 작업은 영향받지 않으며 기존 설정대로 현재 계정을 실행합니다."
+
+#: app/sub_interfaces/accounts_interface.py:237
+msgid ""
+"已开启：每个账号使用自己的配置。\n"
+"当前正在使用的配置已保存为当前账号的配置，另有 {count} 个账号已按官方默认配置建立各自的配置。"
+msgstr ""
+"켜기: 각 계정이 고유한 설정을 사용합니다.\n"
+"현재 사용 중인 설정은 현재 계정의 설정으로 저장되었으며, 다른 {count}개 계정은 공식 기본값을 기반으로 각각의 설정이 생성되었습니다."
+
+#: app/sub_interfaces/accounts_interface.py:54
+msgid "开启后每个账号使用自己的配置；关闭时所有账号共用同一份配置"
+msgstr "켜면 각 계정이 고유한 설정을 사용하며, 끄면 모든 계정이 동일한 설정을 공유합니다"
+
+#: app/sub_interfaces/accounts_interface.py:60
+msgid "开启后，在主界面点击“开始运行”将依次运行所有已导出的账号（每个账号跑完自动切换下一个）"
+msgstr ""
+"켜면 메인 화면에서 \"실행\"을 클릭할 때 내보낸 모든 계정을 순차적으로 실행합니다 (각 계정 완료 후 자동으로 다음 계정으로 전환)"
+
+#: app/sub_interfaces/accounts_interface.py:56
+msgid "把选中账号的配置替换为其他账号或官方默认配置"
+msgstr "선택한 계정의 설정을 다른 계정의 설정 또는 공식 기본 설정으로 교체합니다"
+
+#: app/sub_interfaces/accounts_interface.py:248
+msgid "请选择要复制配置到的账户"
+msgstr "설정을 복사할 계정을 선택하세요"
+
+#: app/sub_interfaces/accounts_interface.py:284
+msgid ""
+"还没有任何已导出的账号。\n"
+"请先对每个账号执行“导出当前游戏账户”后再开启。"
+msgstr ""
+"내보낸 계정이 없습니다.\n"
+"켜기 전에 각 계정에서 \"현재 게임 계정 내보내기\"를 실행하세요."
+
+#: app/sub_interfaces/accounts_interface.py:261
+msgid "选择要复制过来的配置来源（将覆盖目标账号现有配置）"
+msgstr "복사할 설정 출처를 선택하세요 (대상 계정의 기존 설정을 덮어씁니다)"
+
+#: app/sub_interfaces/accounts_interface.py:271
+msgid "配置已复制"
+msgstr "설정을 복사했습니다"
+
+#: app/sub_interfaces/accounts_interface.py:236
+msgid "配置跟随账号"
+msgstr "설정이 계정을 따름"
+
+#: app/sub_interfaces/accounts_interface.py:80
+msgid "配置跟随账号：关"
+msgstr "설정이 계정을 따름: 꺼짐"
+
+#: app/sub_interfaces/accounts_interface.py:80
+msgid "配置跟随账号：开"
+msgstr "설정이 계정을 따름: 켜짐"

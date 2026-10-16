@@ -6241,3 +6241,103 @@ msgstr "HoYoPlay"
 #: app/setting_interface.py:3349
 msgid "选择启动器路径"
 msgstr "選擇啟動器路徑"
+
+#: app/sub_interfaces/accounts_interface.py:103
+msgid "[已自定义]"
+msgstr "[已自定義]"
+
+#: app/sub_interfaces/accounts_interface.py:100
+msgid "[当前]"
+msgstr "[目前]"
+
+#: app/sub_interfaces/accounts_interface.py:273
+msgid "复制失败，请查看日志"
+msgstr "複製失敗，請查看日誌"
+
+#: app/sub_interfaces/accounts_interface.py:55
+msgid "复制配置"
+msgstr "複製配置"
+
+#: app/sub_interfaces/accounts_interface.py:283
+msgid "多账号连跑"
+msgstr "多帳號連跑"
+
+#: app/sub_interfaces/accounts_interface.py:89
+msgid "多账号连跑：关"
+msgstr "多帳號連跑：關"
+
+#: app/sub_interfaces/accounts_interface.py:89
+msgid "多账号连跑：开"
+msgstr "多帳號連跑：開"
+
+#: app/sub_interfaces/accounts_interface.py:259
+msgid "官方默认配置"
+msgstr "官方預設配置"
+
+#: app/sub_interfaces/accounts_interface.py:297
+msgid "已关闭：“开始运行”仅运行当前账号。"
+msgstr "已關閉：「開始執行」僅執行目前帳號。"
+
+#: app/sub_interfaces/accounts_interface.py:243
+msgid "已关闭：所有账号共用同一份配置（已保存的账号配置不会被删除）。"
+msgstr "已關閉：所有帳號共用同一份配置（已儲存的帳號配置不會被刪除）。"
+
+#: app/sub_interfaces/accounts_interface.py:291
+msgid ""
+"已开启：在主界面点击“开始运行”时，将依次运行所有已导出的账号，每个账号跑完自动切换下一个，结束后发送汇总通知。\n"
+"定时任务不受影响，仍按原配置运行当前账号。"
+msgstr ""
+"已開啟：在主畫面點擊「開始執行」時，將依序執行所有已匯出的帳號，每個帳號跑完自動切換下一個，結束後傳送彙總通知。\n"
+"定時任務不受影響，仍按原配置執行目前帳號。"
+
+#: app/sub_interfaces/accounts_interface.py:237
+msgid ""
+"已开启：每个账号使用自己的配置。\n"
+"当前正在使用的配置已保存为当前账号的配置，另有 {count} 个账号已按官方默认配置建立各自的配置。"
+msgstr ""
+"已開啟：每個帳號使用自己的配置。\n"
+"目前正在使用的配置已儲存為目前帳號的配置，另有 {count} 個帳號已按官方預設配置建立各自的配置。"
+
+#: app/sub_interfaces/accounts_interface.py:54
+msgid "开启后每个账号使用自己的配置；关闭时所有账号共用同一份配置"
+msgstr "開啟後每個帳號使用自己的配置；關閉時所有帳號共用同一份配置"
+
+#: app/sub_interfaces/accounts_interface.py:60
+msgid "开启后，在主界面点击“开始运行”将依次运行所有已导出的账号（每个账号跑完自动切换下一个）"
+msgstr "開啟後，在主畫面點擊「開始執行」將依序執行所有已匯出的帳號（每個帳號跑完自動切換下一個）"
+
+#: app/sub_interfaces/accounts_interface.py:56
+msgid "把选中账号的配置替换为其他账号或官方默认配置"
+msgstr "把選取帳號的配置取代為其他帳號或官方預設配置"
+
+#: app/sub_interfaces/accounts_interface.py:248
+msgid "请选择要复制配置到的账户"
+msgstr "請選擇要複製配置到的帳戶"
+
+#: app/sub_interfaces/accounts_interface.py:284
+msgid ""
+"还没有任何已导出的账号。\n"
+"请先对每个账号执行“导出当前游戏账户”后再开启。"
+msgstr ""
+"還沒有任何已匯出的帳號。\n"
+"請先對每個帳號執行「匯出目前遊戲帳戶」後再開啟。"
+
+#: app/sub_interfaces/accounts_interface.py:261
+msgid "选择要复制过来的配置来源（将覆盖目标账号现有配置）"
+msgstr "選擇要複製過來的配置來源（將覆寫目標帳號現有配置）"
+
+#: app/sub_interfaces/accounts_interface.py:271
+msgid "配置已复制"
+msgstr "配置已複製"
+
+#: app/sub_interfaces/accounts_interface.py:236
+msgid "配置跟随账号"
+msgstr "配置跟隨帳號"
+
+#: app/sub_interfaces/accounts_interface.py:80
+msgid "配置跟随账号：关"
+msgstr "配置跟隨帳號：關"
+
+#: app/sub_interfaces/accounts_interface.py:80
+msgid "配置跟随账号：开"
+msgstr "配置跟隨帳號：開"

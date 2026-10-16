@@ -166,6 +166,10 @@ def get_loaded_account():
         return None
 
 
+# 官方默认配置的账号项缓存（运行期不变的静态资产，见 _default_account_part）
+_DEFAULT_ACCOUNT_PART_CACHE = None
+
+
 def set_enabled(enabled: bool, adopt_current: bool = True) -> bool:
     """
     打开/关闭「配置跟随账号」。
@@ -294,12 +298,21 @@ def _account_part(config) -> dict:
 
 
 def _default_account_part() -> dict:
-    """官方默认配置里的账号项（用于新账号首次初始化）"""
-    example = _read(EXAMPLE_PATH)
-    if not isinstance(example, dict):
-        log.error("[按账号配置] 读取官方默认配置失败")
-        return {}
-    return _account_part(example)
+    """官方默认配置里的账号项（用于新账号首次初始化）
+
+    config.example.yaml 是随程序分发的静态资产，运行期不会变，
+    因此按进程缓存一次，避免账号列表渲染/批量建档时反复读盘。
+    返回缓存字典的浅拷贝，防止调用方改动污染缓存。
+    """
+    global _DEFAULT_ACCOUNT_PART_CACHE
+    if _DEFAULT_ACCOUNT_PART_CACHE is None:
+        example = _read(EXAMPLE_PATH)
+        if not isinstance(example, dict):
+            log.error("[按账号配置] 读取官方默认配置失败")
+            _DEFAULT_ACCOUNT_PART_CACHE = {}
+        else:
+            _DEFAULT_ACCOUNT_PART_CACHE = _account_part(example)
+    return dict(_DEFAULT_ACCOUNT_PART_CACHE)
 
 
 def _merge_live_with_account(live, account_part):
@@ -340,8 +353,6 @@ def sync_to(uid) -> bool:
 
     由切号流程与每次运行前调用，返回 True 表示本次确实做了切换。
     """
-    if not is_enabled():
-        return False
     if uid is None:
         return False
     try:
@@ -349,7 +360,11 @@ def sync_to(uid) -> bool:
     except (TypeError, ValueError):
         return False
 
+    # 状态只读一次：is_enabled 与 loaded_account 都从这里取，避免重复读盘
     state = _load_state()
+    if not state.get("config_follows_account", False):
+        return False
+
     loaded = state.get("loaded_account")
     try:
         loaded = int(loaded) if loaded is not None else None
@@ -396,8 +411,7 @@ def sync_to(uid) -> bool:
 
 def sync_current() -> bool:
     """按注册表里当前登录的账号切换配置（运行前调用）"""
-    if not is_enabled():
-        return False
+    # sync_to 内部会自行判断开关状态，无需先 is_enabled() 多读一次状态文件
     return sync_to(gamereg_uid())
 
 
